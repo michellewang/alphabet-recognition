@@ -33,12 +33,10 @@ def main():
 
     # create a surface on screen
     screen = pygame.display.set_mode((width, height))
-    screen.fill(BLACK)
+    screen.fill(WHITE)
 
     # set up first frame
-    # lefthand = {'x':(1/3)*width, 'y':height/2, 'prev':((1/3)*width, height/2), 'on':False}
-    # righthand = {'x':(2/3)*width, 'y':height/2, 'prev':((2/3)*width, height/2), 'on':False}
-    # updateHands()
+
     lefthand = Circle(((1/3)*width, height/2), BLUE)
     righthand = Circle(((2/3)*width, height/2), RED)
 
@@ -58,7 +56,8 @@ def main():
         for event in pygame.event.get():
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
-                #screenshot()
+                screenshot()
+                guess()
                 # change the value to False, to exit the main loop
                 running = False
 
@@ -87,7 +86,7 @@ def main():
         trace_sprites.update()
 
         #Drawing on Screen
-        screen.fill(BLACK)
+        screen.fill(WHITE)
 
         #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
         trace_sprites.draw(screen)
@@ -111,6 +110,7 @@ def collisionDetection(hand1, hand2):
             hand2.toggleTrace()
             if not hand2.traceOn:
                 screenshot()
+                guess()
 
     else:
         if collision:
@@ -122,7 +122,7 @@ def screenshot():
     trace_sprites.update()
 
     #Drawing on Screen
-    screen.fill(BLACK)
+    screen.fill(WHITE)
 
     #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
     trace_sprites.draw(screen)
@@ -131,12 +131,13 @@ def screenshot():
     pygame.display.flip()
     pygame.image.save(screen, 'screenshot.jpeg')
 
+def guess():
     guess = ocr_core('screenshot.jpeg')
     print('guess: ' + guess)
 
 def updateTrace(hand):
     if hand.traceOn:
-        newCircle = Circle(hand.getPos(), WHITE)
+        newCircle = Circle(hand.getPos(), BLACK)
         trace_sprites.add(newCircle)
 
 # run the main function only if this module is executed as the main script
