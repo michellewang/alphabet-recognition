@@ -25,6 +25,9 @@ def main():
     global trace_sprites
     global hands_sprites
 
+    global word
+    word = []
+
     radius = 20
 
     # initialize the pygame module
@@ -79,6 +82,11 @@ def main():
             lefthand.moveRight()
         if keys[pygame.K_a]:
             lefthand.moveLeft()
+        if keys[pygame.K_SPACE]:
+            trace_sprites = pygame.sprite.Group()
+        if keys[pygame.K_RETURN]:
+            word.append(guess())
+            print('word: ' + "".join(word))
         collisionDetection(lefthand, righthand)
 
         #Game Logic
@@ -134,6 +142,7 @@ def screenshot():
 def guess():
     guess = ocr_core('screenshot.jpeg')
     print('guess: ' + guess)
+    return guess
 
 def updateTrace(hand):
     if hand.traceOn:
