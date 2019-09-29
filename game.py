@@ -3,12 +3,9 @@ import pygame
 from pygame.locals import *
 
 from circle import Circle
+from ocr import ocr_core
 
 import math
-import numpy as np
-
-SQUARE_SIZE = 20
-N_SQUARES = 28
 
 SPEED = 5
 
@@ -17,7 +14,7 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
-(width, height) = (SQUARE_SIZE*N_SQUARES, SQUARE_SIZE*N_SQUARES)
+(width, height) = (500, 500)
 
 collision = False
 
@@ -26,6 +23,7 @@ def main():
 
     global screen
     global trace_sprites
+    global hands_sprites
 
     radius = 20
 
@@ -60,10 +58,11 @@ def main():
         for event in pygame.event.get():
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
+                screenshot()
                 # change the value to False, to exit the main loop
                 running = False
 
-        trace(righthand)
+        updateTrace(righthand)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             righthand.moveUp()
@@ -81,10 +80,6 @@ def main():
             lefthand.moveRight()
         if keys[pygame.K_a]:
             lefthand.moveLeft()
-        if keys[pygame.K_t]:
-            righthand.traceOn = True
-            print('trace: ', righthand.traceOn)
-            print(lefthand.getPos(), righthand.getPos())
         collisionDetection(lefthand, righthand)
 
         #Game Logic
@@ -113,13 +108,33 @@ def collisionDetection(hand1, hand2):
     if distance <= max:
         if not collision:
             collision = True
-            hand2.traceOn = not hand2.traceOn
-            print(collision)
+            hand2.toggleTrace
+            if not hand2.traceOn:
+                screenshot()
+
     else:
         if collision:
             collision = False
 
-def trace(hand):
+def screenshot():
+    #Game Logic
+    hands_sprites.update()
+    trace_sprites.update()
+
+    #Drawing on Screen
+    screen.fill(BLACK)
+
+    #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
+    trace_sprites.draw(screen)
+
+    #Refresh Screen
+    pygame.display.flip()
+    pygame.image.save(screen, 'screenshot.jpeg')
+
+    guess = ocr_core('screenshot.jpeg')
+    print('guess: ' + guess)
+
+def updateTrace(hand):
     if hand.traceOn:
         newCircle = Circle(hand.getPos(), WHITE)
         trace_sprites.add(newCircle)

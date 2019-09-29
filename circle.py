@@ -32,7 +32,6 @@ class Circle(pygame.sprite.Sprite):
 
     def toggleTrace(self):
         self.traceOn = not self.traceOn
-        print('trace: ', self.traceOn)
 
     def getPos(self):
         return (self.rect.x, self.rect.y)
