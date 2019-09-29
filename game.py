@@ -58,7 +58,7 @@ def main():
         for event in pygame.event.get():
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
-                screenshot()
+                #screenshot()
                 # change the value to False, to exit the main loop
                 running = False
 
@@ -108,7 +108,7 @@ def collisionDetection(hand1, hand2):
     if distance <= max:
         if not collision:
             collision = True
-            hand2.toggleTrace
+            hand2.toggleTrace()
             if not hand2.traceOn:
                 screenshot()
 
