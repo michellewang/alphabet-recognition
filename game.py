@@ -2,31 +2,31 @@
 import pygame
 from pygame.locals import *
 
+from circle import Circle
+
 import math
 import numpy as np
 
 SQUARE_SIZE = 20
-N_PIXELS = 28
+N_SQUARES = 28
 
 SPEED = 5
 
-WHITE =     (255, 255, 255)
-BLUE =      (  0,   0, 255)
-GREEN =     (  0, 255,   0)
-RED =       (255,   0,   0)
-BLACK = (  0,   0,  0)
-(width, height) = (SQUARE_SIZE*N_PIXELS, SQUARE_SIZE*N_PIXELS)
+WHITE = (254, 254, 254)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+(width, height) = (SQUARE_SIZE*N_SQUARES, SQUARE_SIZE*N_SQUARES)
 
 collision = False
 
 # define a main function
 def main():
 
-    global running, screen
-    # global x1,x2,y1,y2
+    global screen
+    global trace_sprites
 
-    global lefthand, righthand
-    global radius
     radius = 20
 
     # initialize the pygame module
@@ -35,11 +35,22 @@ def main():
 
     # create a surface on screen
     screen = pygame.display.set_mode((width, height))
+    screen.fill(BLACK)
 
     # set up first frame
-    lefthand = {'x':(1/3)*width, 'y':height/2, 'prev':((1/3)*width, height/2), 'on':False}
-    righthand = {'x':(2/3)*width, 'y':height/2, 'prev':((2/3)*width, height/2), 'on':False}
-    updateHands()
+    # lefthand = {'x':(1/3)*width, 'y':height/2, 'prev':((1/3)*width, height/2), 'on':False}
+    # righthand = {'x':(2/3)*width, 'y':height/2, 'prev':((2/3)*width, height/2), 'on':False}
+    # updateHands()
+    lefthand = Circle(((1/3)*width, height/2), BLUE)
+    righthand = Circle(((2/3)*width, height/2), RED)
+
+    #This will be a list that will contain all the sprites we intend to use in our game.
+    hands_sprites = pygame.sprite.Group()
+    trace_sprites = pygame.sprite.Group()
+
+    # Add the car to the list of objects
+    hands_sprites.add(lefthand)
+    hands_sprites.add(righthand)
 
     # main loop
     running = True
@@ -47,62 +58,71 @@ def main():
 
         # event handling, gets all event from the event queue
         for event in pygame.event.get():
-
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
                 # change the value to False, to exit the main loop
                 running = False
 
+        trace(righthand)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            righthand['y'] -= SPEED
+            righthand.moveUp()
         if keys[pygame.K_DOWN]:
-            righthand['y'] += SPEED
+            righthand.moveDown()
         if keys[pygame.K_RIGHT]:
-            righthand['x'] += SPEED
+            righthand.moveRight()
         if keys[pygame.K_LEFT]:
-            righthand['x'] -= SPEED
+            righthand.moveLeft()
         if keys[pygame.K_w]:
-            lefthand['y'] -= SPEED
+            lefthand.moveUp()
         if keys[pygame.K_s]:
-            lefthand['y'] += SPEED
+            lefthand.moveDown()
         if keys[pygame.K_d]:
-            lefthand['x'] += SPEED
+            lefthand.moveRight()
         if keys[pygame.K_a]:
-            lefthand['x'] -= SPEED
-        collisionDetection()
-        updateHands()
+            lefthand.moveLeft()
+        if keys[pygame.K_t]:
+            righthand.traceOn = True
+            print('trace: ', righthand.traceOn)
+            print(lefthand.getPos(), righthand.getPos())
+        collisionDetection(lefthand, righthand)
 
-def collisionDetection():
+        #Game Logic
+        hands_sprites.update()
+        trace_sprites.update()
+
+        #Drawing on Screen
+        screen.fill(BLACK)
+
+        #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
+        trace_sprites.draw(screen)
+        hands_sprites.draw(screen)
+
+        #Refresh Screen
+        pygame.display.flip()
+
+def collisionDetection(hand1, hand2):
     global collision
-    distance = math.sqrt((lefthand['x']-righthand['x'])**2 + (lefthand['y']-righthand['y'])**2)
-    if distance <= radius*2:
+    x1 = hand1.rect.x
+    x2 = hand2.rect.x
+    y1 = hand1.rect.y
+    y2 = hand2.rect.y
+
+    max = hand1.radius + hand2.radius
+    distance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
+    if distance <= max:
         if not collision:
             collision = True
-            righthand['on'] = not righthand['on']
+            hand2.traceOn = not hand2.traceOn
+            print(collision)
     else:
         if collision:
             collision = False
 
-def updateHands():
-
-    if not lefthand['on']:
-        drawCircle(BLACK, (lefthand['prev']))
-
-    if not righthand['on']:
-        drawCircle(BLACK, (righthand['prev']))
-
-    drawCircle(BLUE, (lefthand['x'], lefthand['y']))
-    drawCircle(RED, (righthand['x'], righthand['y']))
-
-    lefthand['prev'] = (lefthand['x'], lefthand['y'])
-    righthand['prev'] = (righthand['x'], righthand['y'])
-
-    pygame.display.update()
-
-def drawCircle(color, position):
-    position = (int(position[0]), int(position[1]))
-    pygame.draw.circle(screen, color, position, radius)
+def trace(hand):
+    if hand.traceOn:
+        newCircle = Circle(hand.getPos(), WHITE)
+        trace_sprites.add(newCircle)
 
 # run the main function only if this module is executed as the main script
 # (if you import this as a module then nothing is executed)
