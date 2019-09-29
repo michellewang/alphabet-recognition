@@ -87,6 +87,7 @@ def main():
         if keys[pygame.K_RETURN]:
             word.append(guess())
             print('word: ' + "".join(word))
+            trace_sprites = pygame.sprite.Group()
         collisionDetection(lefthand, righthand)
 
         #Game Logic
